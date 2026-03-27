@@ -451,7 +451,7 @@ function doSearch() {
   nav('results');
   var meta = document.getElementById('resultsMeta');
 
-  var isLive = window.location.hostname !== 'localhost' && window.location.protocol !== 'file:';
+  var isLive = true;
   if(isLive || C.key) {
     meta.textContent = '⏳ Fetching real prices from Amazon…';
     scrapeSearch(q)
