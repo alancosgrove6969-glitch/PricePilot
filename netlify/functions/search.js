@@ -34,10 +34,8 @@ exports.handler = async function(event) {
 
       // Better title matching - require at least 15 chars to avoid single words
       const titleMatch =
-        chunk.match(/class="[^"]*a-size-medium[^"]*a-color-base[^"]*"[^>]*>\s*([^<]{15,})\s*<\/span>/) ||
-        chunk.match(/class="[^"]*a-size-base-plus[^"]*"[^>]*>\s*([^<]{15,})\s*<\/span>/) ||
-        chunk.match(/class="[^"]*a-size-medium[^"]*"[^>]*>\s*([^<]{15,})\s*<\/span>/) ||
-        chunk.match(/"a-text-normal"[^>]*>\s*([^<]{15,})\s*<\/span>/);
+  chunk.match(/class="[^"]*a-size-medium[^"]*"[^>]*>\s*([^<]+)\s*<\/span>/) ||
+  chunk.match(/class="[^"]*a-size-base-plus[^"]*"[^>]*>\s*([^<]+)\s*<\/span>/);
 
       const priceMatch = chunk.match(/class="a-offscreen">([€£$][0-9,\.]+)<\/span>/);
       const imgMatch = chunk.match(/class="s-image"[^>]*src="([^"]+)"/);
