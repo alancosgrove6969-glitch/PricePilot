@@ -32,13 +32,22 @@ exports.handler = async function(event) {
       const asinMatch = chunk.match(/data-asin="([A-Z0-9]{10})"/);
       if(!asinMatch) continue;
 
-      // Better title matching - require at least 15 chars to avoid single words
-      const titleMatch =
-  chunk.match(/class="[^"]*a-size-medium[^"]*"[^>]*>\s*([^<]+)\s*<\/span>/) ||
-  chunk.match(/class="[^"]*a-size-base-plus[^"]*"[^>]*>\s*([^<]+)\s*<\/span>/);
+      // Full title - grab the longest matching span to get complete product name
+      const titleCandidates = [
+        ...chunk.matchAll(/class="[^"]*a-size-medium[^"]*"[^>]*>\s*([^<]+)\s*<\/span>/g),
+        ...chunk.matchAll(/class="[^"]*a-size-base-plus[^"]*"[^>]*>\s*([^<]+)\s*<\/span>/g),
+        ...chunk.matchAll(/"a-text-normal"[^>]*>\s*([^<]+)\s*<\/span>/g),
+      ];
+      // Pick the longest title candidate
+      const titleMatch = titleCandidates.reduce((best, m) => 
+        (!best || m[1].trim().length > best[1].trim().length) ? m : best, null);
 
       const priceMatch = chunk.match(/class="a-offscreen">([€£$][0-9,\.]+)<\/span>/);
       const imgMatch = chunk.match(/class="s-image"[^>]*src="([^"]+)"/);
+      
+      // Check availability - skip if explicitly unavailable
+      const unavailable = /currently unavailable|out of stock|nicht auf lager|no disponible|non disponibile|indisponible/i.test(chunk);
+      if(unavailable) continue;
 
       if(!titleMatch || !priceMatch) continue;
 
@@ -58,6 +67,7 @@ exports.handler = async function(event) {
         title: titleMatch[1].trim().replace(/\s+/g,' '),
         thumb: imgMatch ? imgMatch[1] : '',
         buyLink: `https://www.${targetStore}/dp/${asin}${tag?'?tag='+tag:''}`,
+        inStock: true,
       });
     }
 
